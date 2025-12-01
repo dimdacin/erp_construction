@@ -1,0 +1,5 @@
+Flask
+SQLAlchemy
+psycopg2-binary  # Pour PostgreSQL
+python-dotenv
+pandas  # Nécessaire pour l'importation de fichiers Excel

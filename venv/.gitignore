@@ -1,0 +1,12 @@
+# Environnement Python
+venv/
+__pycache__/
+*.pyc
+
+# Configuration sensible (DOIT ÊTRE IGNORÉ)
+.env
+/service_account.json 
+
+# Fichiers d'IDE/Système
+.DS_Store
+.vscode/
