@@ -1,0 +1,271 @@
+.equipements-page {
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #1e3a5f;
+  font-size: 1.8rem;
+}
+
+.equipements-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.summary-stat {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary-stat.success {
+  border-left: 4px solid #2ecc71;
+}
+
+.summary-stat-icon {
+  font-size: 2rem;
+}
+
+.summary-stat-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.summary-stat-label {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
+
+.equipements-filters {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.filter-group select {
+  padding: 8px 16px;
+  border: 1px solid #dce4ec;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  background: white;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: #4da6ff;
+}
+
+.equipements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.equipement-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-top: 4px solid #dce4ec;
+}
+
+.equipement-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.equipement-card.status-disponible {
+  border-top-color: #2ecc71;
+}
+
+.equipement-card.status-en_utilisation {
+  border-top-color: #3498db;
+}
+
+.equipement-card.status-en_maintenance {
+  border-top-color: #f39c12;
+}
+
+.equipement-card.status-hors_service {
+  border-top-color: #e74c3c;
+}
+
+.equipement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.equipement-categorie {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #dce4ec;
+}
+
+.status-dot-disponible {
+  background: #2ecc71;
+}
+
+.status-dot-en_utilisation {
+  background: #3498db;
+}
+
+.status-dot-en_maintenance {
+  background: #f39c12;
+}
+
+.status-dot-hors_service {
+  background: #e74c3c;
+}
+
+.equipement-nom {
+  margin: 0 0 8px 0;
+  color: #1e3a5f;
+  font-size: 1.1rem;
+}
+
+.equipement-description {
+  margin: 0 0 16px 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.equipement-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detail {
+  text-align: center;
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #7f8c8d;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e3a5f;
+}
+
+.equipement-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #ecf0f1;
+}
+
+.status-badge-disponible {
+  background: #e8f8f0;
+  color: #27ae60;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge-en_utilisation {
+  background: #e8f4fd;
+  color: #2980b9;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge-en_maintenance {
+  background: #fef5e7;
+  color: #d68910;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge-hors_service {
+  background: #fdeaea;
+  color: #e74c3c;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.equipement-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon-small {
+  background: #f8f9fa;
+  border: 1px solid #dce4ec;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-small:hover {
+  background: #ecf0f1;
+}
