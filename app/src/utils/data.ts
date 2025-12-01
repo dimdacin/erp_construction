@@ -193,3 +193,8 @@ export function getProjetNom(projetId: string): string {
   const projet = projetsData.find(p => p.id === projetId);
   return projet ? projet.nom : 'Projet inconnu';
 }
+
+// Fonction utilitaire pour formater un statut (remplace les underscores par des espaces)
+export function formatStatus(status: string): string {
+  return status.replace(/_/g, ' ');
+}

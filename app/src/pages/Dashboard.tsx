@@ -1,4 +1,4 @@
-import { projetsData, clientsData, facturesData, equipementsData } from '../utils/data';
+import { projetsData, clientsData, facturesData, equipementsData, formatStatus } from '../utils/data';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -87,7 +87,7 @@ function Dashboard() {
                     <td>{projet.nom}</td>
                     <td>
                       <span className={`status-badge status-${projet.statut}`}>
-                        {projet.statut.replace('_', ' ')}
+                        {formatStatus(projet.statut)}
                       </span>
                     </td>
                     <td>{formatMontant(projet.budget)}</td>
@@ -129,7 +129,7 @@ function Dashboard() {
                     <td>{new Date(facture.dateEcheance).toLocaleDateString('fr-FR')}</td>
                     <td>
                       <span className={`status-badge status-${facture.statut}`}>
-                        {facture.statut.replace('_', ' ')}
+                        {formatStatus(facture.statut)}
                       </span>
                     </td>
                   </tr>

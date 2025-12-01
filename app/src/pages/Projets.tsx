@@ -1,4 +1,4 @@
-import { projetsData, getClientNom } from '../utils/data';
+import { projetsData, getClientNom, formatStatus } from '../utils/data';
 import './Projets.css';
 
 function Projets() {
@@ -43,7 +43,7 @@ function Projets() {
             <div className="projet-header">
               <h3>{projet.nom}</h3>
               <span className={`status-badge status-${projet.statut}`}>
-                {projet.statut.replace('_', ' ')}
+                {formatStatus(projet.statut)}
               </span>
             </div>
             

@@ -1,4 +1,4 @@
-import { facturesData, getClientNom, getProjetNom } from '../utils/data';
+import { facturesData, getClientNom, getProjetNom, formatStatus } from '../utils/data';
 import './Factures.css';
 
 function Factures() {
@@ -56,7 +56,7 @@ function Factures() {
               <div className="facture-numero">
                 <span className="numero">{facture.numero}</span>
                 <span className={`status-badge status-${facture.statut}`}>
-                  {facture.statut.replace('_', ' ')}
+                  {formatStatus(facture.statut)}
                 </span>
               </div>
               <div className="facture-montant">
