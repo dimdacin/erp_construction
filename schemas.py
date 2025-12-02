@@ -49,8 +49,40 @@ class EquipementResponse(BaseModel):
     code: str
     immatriculation: Optional[str] = None
     categorie: Optional[str] = None
-    cout_horaire_theorique: Decimal
+    cout_horaire_theorique: Optional[Decimal] = None
     site_rattachement_id: Optional[int] = None
+    
+    class Config:
+        from_attributes = True
+
+class EquipementCreate(BaseModel):
+    """Schéma de validation pour la création d'un équipement."""
+    code: str = Field(..., description="Code unique de l'équipement (ex: PL1, R4).")
+    immatriculation: Optional[str] = Field(None, description="Immatriculation de l'équipement.")
+    categorie_id: Optional[int] = Field(None, description="ID de la catégorie d'équipement.")
+    unite_compteur: Optional[str] = Field('H', description="Unité de compteur (H pour heures, KM pour kilomètres).")
+    usage_source: Optional[str] = Field('MANUEL', description="Source d'usage (MANUEL, OMNICOMM).")
+    conso_h_l: Optional[Decimal] = Field(None, description="Consommation horaire en litres.")
+    cout_usage_1h_lei: Optional[Decimal] = Field(None, description="Coût d'usage pour 1 heure en LEI.")
+    cout_usage_100km_lei: Optional[Decimal] = Field(None, description="Coût d'usage pour 100 km en LEI.")
+    site_rattachement_id: Optional[int] = Field(None, description="ID du site de rattachement.")
+    actif: Optional[bool] = Field(True, description="Statut actif de l'équipement.")
+    
+    class Config:
+        from_attributes = True
+
+class EquipementUpdate(BaseModel):
+    """Schéma de validation pour la mise à jour d'un équipement."""
+    code: Optional[str] = Field(None, description="Code unique de l'équipement.")
+    immatriculation: Optional[str] = Field(None, description="Immatriculation de l'équipement.")
+    categorie_id: Optional[int] = Field(None, description="ID de la catégorie d'équipement.")
+    unite_compteur: Optional[str] = Field(None, description="Unité de compteur.")
+    usage_source: Optional[str] = Field(None, description="Source d'usage.")
+    conso_h_l: Optional[Decimal] = Field(None, description="Consommation horaire en litres.")
+    cout_usage_1h_lei: Optional[Decimal] = Field(None, description="Coût d'usage pour 1 heure en LEI.")
+    cout_usage_100km_lei: Optional[Decimal] = Field(None, description="Coût d'usage pour 100 km en LEI.")
+    site_rattachement_id: Optional[int] = Field(None, description="ID du site de rattachement.")
+    actif: Optional[bool] = Field(None, description="Statut actif de l'équipement.")
     
     class Config:
         from_attributes = True

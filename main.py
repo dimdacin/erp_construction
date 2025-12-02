@@ -10,10 +10,17 @@ from database import get_db, engine
 from models import (
     Equipement, Personne, AffectationEquipement, DepenseEquipement, EquipementCategorie
 )
-from schemas import AffectationCreate, DepenseEquipementCreate # Les schémas Pydantic
+from schemas import (
+    AffectationCreate, DepenseEquipementCreate, 
+    EquipementCreate, EquipementUpdate, EquipementResponse
+) # Les schémas Pydantic
 
 # --- 2. Imports de la Couche Logique Métier (CRUD) ---
-from crud_equipement import import_equipements_from_excel # Importe l'import des équipements
+from crud_equipement import (
+    import_equipements_from_excel,
+    get_equipement, get_equipements, create_equipement, 
+    update_equipement, delete_equipement
+) # Importe les fonctions CRUD pour équipements
 from crud_depenses import import_depenses_from_excel # Importe l'import des dépenses
 
 
@@ -134,22 +141,24 @@ def list_equipements(
 def run_import_equipements(db: Session = Depends(get_db)):
     """
     Lance l'importation de la liste des équipements à partir du fichier Excel.
+    Colonnes attendues : EquipID, Categorie, Modele, Immatriculation, Annee, Statut, 
+    UsageSource, UniteCompteur, TypeCarburant, Conso_100km_L, Conso_h_L, etc.
     """
-    # 🚨 ATTENTION : CORRIGÉ - Utilisation du préfixe r pour les chemins Windows
-    file_path = "C:/Users/user/Desktop/QUOTIDIEN/Tableau_Equipements.xlsx" 
+    file_path = r"C:\Users\user\Desktop\QUOTIDIEN\Tableau_Equipements.xlsx" 
     
     result = import_equipements_from_excel(db, file_path)
     
     return {"status": "success", "message": result}
 
-# Route 5 : Importation de Masse des Dépenses (TEMPORAIRE)
+# Route 5 : Importation de Masse des Dépenses/Interventions (TEMPORAIRE)
 @app.post("/import/depenses")
 def run_import_depenses(db: Session = Depends(get_db)):
     """
-    Lance l'importation de l'historique des dépenses d'équipement.
+    Lance l'importation de l'historique des interventions et dépenses d'équipement.
+    Colonnes attendues : Immatriculation, Categorie, Modele, Date, Fournisseur_Nom, 
+    Categ_intervention, description_intervention, montant
     """
-    # 🚨 ATTENTION : CORRIGÉ - Utilisation du préfixe r pour les chemins Windows
-    file_path = r"C:\Users\user\Desktop\QUOTIDIEN\Cheltuieli pentru reparația tehnicii.xlsx" 
+    file_path = r"C:\Users\user\Desktop\QUOTIDIEN\interventionEquipement.xlsx" 
     
     result = import_depenses_from_excel(db, file_path)
     
