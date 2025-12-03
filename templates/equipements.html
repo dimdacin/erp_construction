@@ -137,7 +137,7 @@ $(document).ready(function() {
 
 function loadEquipements() {
     $.ajax({
-        url: '/api/equipements?actif=',
+        url: '/api/equipements',
         method: 'GET',
         success: function(data) {
             equipementsData = data;

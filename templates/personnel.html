@@ -75,7 +75,7 @@ let divisions = new Set();
 
 function loadPersonnel() {
     $.ajax({
-        url: '/api/personnel?actif=',
+        url: '/api/personnel',
         method: 'GET',
         success: function(data) {
             personnelData = data;
