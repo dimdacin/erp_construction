@@ -1,5 +1,23 @@
-Flask
-SQLAlchemy
-psycopg2-binary  # Pour PostgreSQL
-python-dotenv
-pandas  # Nécessaire pour l'importation de fichiers Excel
+# Framework Web
+fastapi==0.115.5
+uvicorn[standard]==0.38.0
+python-multipart==0.0.20
+
+# Base de données
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
+
+# Templates
+jinja2==3.1.6
+
+# Import/Export Excel
+pandas==2.2.3
+openpyxl==3.1.5
+
+# Validation
+pydantic==2.10.3
+email-validator==2.2.0
+
+# Session management
+itsdangerous==2.2.0

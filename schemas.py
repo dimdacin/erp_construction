@@ -86,3 +86,106 @@ class EquipementUpdate(BaseModel):
     
     class Config:
         from_attributes = True
+
+# --- Schémas pour les Sites/Chantiers ---
+
+class SiteCreate(BaseModel):
+    """Schéma de validation pour la création d'un site/chantier."""
+    code: str = Field(..., description="Code unique du site.")
+    nom: str = Field(..., description="Nom/intitulé du site.")
+    type_site: str = Field(..., description="Type: USINE, CHANTIER, DEPOT, BUREAU.")
+    client_nom: Optional[str] = Field(None, description="Nom du client.")
+    localisation: Optional[str] = Field(None, description="Localisation du site.")
+    date_debut: Optional[date] = Field(None, description="Date de début.")
+    date_fin: Optional[date] = Field(None, description="Date de fin.")
+    chef_chantier_id: Optional[int] = Field(None, description="ID du chef de chantier.")
+    statut: Optional[str] = Field("EN_COURS", description="Statut: EN_COURS, TERMINE, PLANIFIE, SUSPENDU.")
+    actif: Optional[bool] = Field(True, description="Statut actif du site.")
+    
+    class Config:
+        from_attributes = True
+
+class SiteUpdate(BaseModel):
+    """Schéma de validation pour la mise à jour d'un site/chantier."""
+    code: Optional[str] = Field(None, description="Code unique du site.")
+    nom: Optional[str] = Field(None, description="Nom/intitulé du site.")
+    type_site: Optional[str] = Field(None, description="Type du site.")
+    client_nom: Optional[str] = Field(None, description="Nom du client.")
+    localisation: Optional[str] = Field(None, description="Localisation du site.")
+    date_debut: Optional[date] = Field(None, description="Date de début.")
+    date_fin: Optional[date] = Field(None, description="Date de fin.")
+    chef_chantier_id: Optional[int] = Field(None, description="ID du chef de chantier.")
+    statut: Optional[str] = Field(None, description="Statut du site.")
+    actif: Optional[bool] = Field(None, description="Statut actif du site.")
+    
+    class Config:
+        from_attributes = True
+
+class SiteResponse(BaseModel):
+    """Schéma de réponse pour un site/chantier."""
+    id: int
+    code: str
+    nom: str
+    type_site: str
+    client: Optional[str] = None
+    localisation: Optional[str] = None
+    date_debut: Optional[date] = None
+    date_fin: Optional[date] = None
+    chef_chantier: Optional[str] = None
+    statut: Optional[str] = None
+    actif: bool
+    
+    class Config:
+        from_attributes = True
+
+# --- Schémas pour les Personnes/Salariés ---
+
+class PersonneCreate(BaseModel):
+    """Schéma de validation pour la création d'un salarié."""
+    matricule: str = Field(..., description="Matricule unique du salarié.")
+    nom_prenom: str = Field(..., description="Nom et prénom du salarié.")
+    secteur: Optional[str] = Field(None, description="Secteur d'activité.")
+    division_nom: Optional[str] = Field(None, description="Nom de la division.")
+    service_nom: Optional[str] = Field(None, description="Nom du service.")
+    fonction_nom: Optional[str] = Field(None, description="Nom de la fonction.")
+    fonction_code: Optional[str] = Field(None, description="Code de la fonction.")
+    salaire_tarif: Optional[Decimal] = Field(None, description="Salaire tarifaire.")
+    accord_supplementaire: Optional[Decimal] = Field(None, description="Accord supplémentaire.")
+    taux_horaire_cout: Optional[Decimal] = Field(None, description="Taux horaire de coût.")
+    actif: Optional[bool] = Field(True, description="Statut actif du salarié.")
+    
+    class Config:
+        from_attributes = True
+
+class PersonneUpdate(BaseModel):
+    """Schéma de validation pour la mise à jour d'un salarié."""
+    matricule: Optional[str] = Field(None, description="Matricule du salarié.")
+    nom_prenom: Optional[str] = Field(None, description="Nom et prénom du salarié.")
+    secteur: Optional[str] = Field(None, description="Secteur d'activité.")
+    division_nom: Optional[str] = Field(None, description="Nom de la division.")
+    service_nom: Optional[str] = Field(None, description="Nom du service.")
+    fonction_nom: Optional[str] = Field(None, description="Nom de la fonction.")
+    fonction_code: Optional[str] = Field(None, description="Code de la fonction.")
+    salaire_tarif: Optional[Decimal] = Field(None, description="Salaire tarifaire.")
+    accord_supplementaire: Optional[Decimal] = Field(None, description="Accord supplémentaire.")
+    taux_horaire_cout: Optional[Decimal] = Field(None, description="Taux horaire de coût.")
+    actif: Optional[bool] = Field(None, description="Statut actif du salarié.")
+    
+    class Config:
+        from_attributes = True
+
+class PersonneResponse(BaseModel):
+    """Schéma de réponse pour un salarié."""
+    id: int
+    matricule: str
+    nom_prenom: str
+    secteur: Optional[str] = None
+    division: Optional[str] = None
+    service: Optional[str] = None
+    fonction: Optional[str] = None
+    salaire_tarif: Optional[Decimal] = None
+    taux_horaire_cout: Optional[Decimal] = None
+    actif: bool
+    
+    class Config:
+        from_attributes = True

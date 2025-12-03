@@ -22,6 +22,8 @@ from crud_equipement import (
     update_equipement, delete_equipement
 ) # Importe les fonctions CRUD pour équipements
 from crud_depenses import import_depenses_from_excel # Importe l'import des dépenses
+from crud_personne import import_personnes_from_excel # Importe l'import du personnel RH
+from crud_site import import_sites_from_excel, get_sites # Importe l'import des sites/chantiers
 
 
 # --- Initialisation de l'Application ---
@@ -163,3 +165,133 @@ def run_import_depenses(db: Session = Depends(get_db)):
     result = import_depenses_from_excel(db, file_path)
     
     return {"status": "success", "message": result}
+
+# Route 6 : Importation de Masse du Personnel RH (TEMPORAIRE)
+@app.post("/import/personnel")
+def run_import_personnel(db: Session = Depends(get_db)):
+    """
+    Lance l'importation du personnel depuis le fichier Excel RH.
+    Colonnes attendues : Sector, Diviziune, Serviciu, Fuctia, Codul functiei, 
+    Nr. de tabel, Numele, prenumele, Salariu tarifar schema, Acord sup, Selection, Commentaire
+    """
+    file_path = r"C:\Users\user\Desktop\QUOTIDIEN\tablrh.xlsx"
+    
+    result = import_personnes_from_excel(db, file_path)
+    
+    return {"status": "success", "message": result}
+
+# Route 7 : Affichage du Personnel (LISTE)
+@app.get("/personnel")
+def list_personnel(
+    db: Session = Depends(get_db),
+    division: Optional[str] = None,
+    service: Optional[str] = None,
+    actif: Optional[bool] = True
+):
+    """Affiche tout le personnel ou filtre par division/service."""
+    from crud_personne import get_personnes
+    from models import Division, Service
+    
+    query = db.query(Personne)
+    
+    if actif is not None:
+        query = query.filter(Personne.actif == actif)
+    
+    if division:
+        div = db.query(Division).filter(Division.nom == division).first()
+        if div:
+            query = query.filter(Personne.division_id == div.id)
+    
+    if service:
+        serv = db.query(Service).filter(Service.nom == service).first()
+        if serv:
+            query = query.filter(Personne.service_id == serv.id)
+    
+    personnes = query.all()
+    
+    result = []
+    for p in personnes:
+        result.append({
+            "id": p.id,
+            "matricule": p.matricule,
+            "nom_prenom": p.nom_prenom,
+            "secteur": p.secteur,
+            "division_id": p.division_id,
+            "service_id": p.service_id,
+            "fonction_id": p.fonction_id,
+            "salaire_tarif": float(p.salaire_tarif) if p.salaire_tarif else 0,
+            "taux_horaire_cout": float(p.taux_horaire_cout) if p.taux_horaire_cout else 0,
+            "actif": p.actif
+        })
+    
+    return result
+
+# Route 8 : Importation de Masse des Sites/Chantiers/Usines (TEMPORAIRE)
+@app.post("/import/sites")
+def run_import_sites(db: Session = Depends(get_db)):
+    """
+    Lance l'importation des sites, chantiers et usines depuis le fichier Excel.
+    Colonnes attendues : ChantierID, Intitule, TypeSite, Client, Localisation, 
+    DateDebut, DateFin, ChefChantier, Statut
+    """
+    file_path = r"C:\Users\user\Desktop\QUOTIDIEN\sites_usines_chantier.xlsx"
+    
+    result = import_sites_from_excel(db, file_path)
+    
+    return {"status": "success", "message": result}
+
+# Route 9 : Affichage des Sites/Chantiers (LISTE)
+@app.get("/sites")
+def list_sites(
+    db: Session = Depends(get_db),
+    type_site: Optional[str] = None,
+    statut: Optional[str] = None,
+    actif: Optional[bool] = True
+):
+    """Affiche tous les sites ou filtre par type/statut."""
+    from models import Site, Client, Personne
+    
+    query = db.query(Site)
+    
+    if actif is not None:
+        query = query.filter(Site.actif == actif)
+    
+    if type_site:
+        query = query.filter(Site.type_site == type_site.upper())
+    
+    if statut:
+        query = query.filter(Site.statut == statut.upper())
+    
+    sites = query.all()
+    
+    result = []
+    for s in sites:
+        # Récupérer les informations liées
+        client_nom = None
+        if s.client_id:
+            client = db.query(Client).filter(Client.id == s.client_id).first()
+            if client:
+                client_nom = client.nom
+        
+        chef_nom = None
+        if s.chef_chantier_id:
+            chef = db.query(Personne).filter(Personne.id == s.chef_chantier_id).first()
+            if chef:
+                chef_nom = chef.nom_prenom
+        
+        result.append({
+            "id": s.id,
+            "code": s.code,
+            "nom": s.nom,
+            "type_site": s.type_site,
+            "centre_analytique": s.centre_analytique.value if s.centre_analytique else None,
+            "client": client_nom,
+            "localisation": s.localisation,
+            "date_debut": s.date_debut.isoformat() if s.date_debut else None,
+            "date_fin": s.date_fin.isoformat() if s.date_fin else None,
+            "chef_chantier": chef_nom,
+            "statut": s.statut,
+            "actif": s.actif
+        })
+    
+    return result

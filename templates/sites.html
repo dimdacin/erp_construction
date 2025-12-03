@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Sites & Chantiers - ERP Construction{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1><i class="fas fa-building"></i> Sites & Chantiers</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <button class="btn btn-primary" onclick="showAddModal()">
+            <i class="fas fa-plus"></i> Nouveau Site
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+            </div>
+            <div class="col-md-3">
+                <select id="filterType" class="form-select">
+                    <option value="">Tous les types</option>
+                    <option value="CHANTIER">Chantier</option>
+                    <option value="USINE">Usine</option>
+                    <option value="DEPOT">Dépôt</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="filterStatut" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="EN_COURS">En cours</option>
+                    <option value="TERMINE">Terminé</option>
+                    <option value="PLANIFIE">Planifié</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-secondary w-100" onclick="loadSites()">
+                    <i class="fas fa-sync"></i> Actualiser
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Code</th>
+                        <th>Intitulé</th>
+                        <th>Type</th>
+                        <th>Client</th>
+                        <th>Localisation</th>
+                        <th>Chef de chantier</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sitesTable">
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout/Modification -->
+<div class="modal fade" id="siteModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nouveau Site</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="siteForm">
+                    <input type="hidden" id="siteId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="code" class="form-label">Code *</label>
+                            <input type="text" class="form-control" id="code" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nom" class="form-label">Intitulé *</label>
+                            <input type="text" class="form-control" id="nom" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="type_site" class="form-label">Type *</label>
+                            <select class="form-select" id="type_site" required>
+                                <option value="CHANTIER">Chantier</option>
+                                <option value="USINE">Usine</option>
+                                <option value="DEPOT">Dépôt</option>
+                                <option value="ADMIN">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="client_nom" class="form-label">Client</label>
+                            <input type="text" class="form-control" id="client_nom">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="localisation" class="form-label">Localisation</label>
+                        <input type="text" class="form-control" id="localisation">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date_debut" class="form-label">Date début</label>
+                            <input type="date" class="form-control" id="date_debut">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="date_fin" class="form-label">Date fin</label>
+                            <input type="date" class="form-control" id="date_fin">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statut" class="form-label">Statut</label>
+                        <select class="form-select" id="statut">
+                            <option value="EN_COURS">En cours</option>
+                            <option value="PLANIFIE">Planifié</option>
+                            <option value="TERMINE">Terminé</option>
+                            <option value="SUSPENDU">Suspendu</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveSite()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let sitesData = [];
+let currentSiteId = null;
+const siteModal = new bootstrap.Modal(document.getElementById('siteModal'));
+
+// Charger les sites au démarrage
+$(document).ready(function() {
+    loadSites();
+    
+    // Filtres et recherche
+    $('#searchInput, #filterType, #filterStatut').on('input change', function() {
+        filterSites();
+    });
+});
+
+// Charger les sites depuis l'API
+function loadSites() {
+    $.ajax({
+        url: '/api/sites',
+        method: 'GET',
+        success: function(data) {
+            sitesData = data;
+            displaySites(data);
+        },
+        error: function(error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors du chargement des sites');
+        }
+    });
+}
+
+// Afficher les sites dans le tableau
+function displaySites(sites) {
+    const tbody = $('#sitesTable');
+    tbody.empty();
+    
+    if (sites.length === 0) {
+        tbody.html('<tr><td colspan="8" class="text-center">Aucun site trouvé</td></tr>');
+        return;
+    }
+    
+    sites.forEach(site => {
+        const badgeType = {
+            'CHANTIER': 'primary',
+            'USINE': 'success',
+            'DEPOT': 'warning',
+            'ADMIN': 'info'
+        }[site.type_site] || 'secondary';
+        
+        const badgeStatut = {
+            'EN_COURS': 'success',
+            'TERMINE': 'secondary',
+            'PLANIFIE': 'info',
+            'SUSPENDU': 'danger'
+        }[site.statut] || 'secondary';
+        
+        tbody.append(`
+            <tr>
+                <td><strong>${site.code}</strong></td>
+                <td>${site.nom}</td>
+                <td><span class="badge bg-${badgeType}">${site.type_site}</span></td>
+                <td>${site.client || '-'}</td>
+                <td>${site.localisation || '-'}</td>
+                <td>${site.chef_chantier || '-'}</td>
+                <td><span class="badge bg-${badgeStatut}">${site.statut || 'N/A'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="editSite(${site.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSite(${site.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `);
+    });
+}
+
+// Filtrer les sites
+function filterSites() {
+    const search = $('#searchInput').val().toLowerCase();
+    const typeFilter = $('#filterType').val();
+    const statutFilter = $('#filterStatut').val();
+    
+    const filtered = sitesData.filter(site => {
+        const matchSearch = site.nom.toLowerCase().includes(search) || 
+                          site.code.toLowerCase().includes(search) ||
+                          (site.client && site.client.toLowerCase().includes(search));
+        const matchType = !typeFilter || site.type_site === typeFilter;
+        const matchStatut = !statutFilter || site.statut === statutFilter;
+        
+        return matchSearch && matchType && matchStatut;
+    });
+    
+    displaySites(filtered);
+}
+
+// Afficher le modal d'ajout
+function showAddModal() {
+    currentSiteId = null;
+    $('#modalTitle').text('Nouveau Site');
+    $('#siteForm')[0].reset();
+    $('#siteId').val('');
+    siteModal.show();
+}
+
+// Éditer un site
+function editSite(id) {
+    const site = sitesData.find(s => s.id === id);
+    if (!site) return;
+    
+    currentSiteId = id;
+    $('#modalTitle').text('Modifier le Site');
+    $('#siteId').val(site.id);
+    $('#code').val(site.code);
+    $('#nom').val(site.nom);
+    $('#type_site').val(site.type_site);
+    $('#client_nom').val(site.client || '');
+    $('#localisation').val(site.localisation || '');
+    $('#date_debut').val(site.date_debut || '');
+    $('#date_fin').val(site.date_fin || '');
+    $('#statut').val(site.statut || 'EN_COURS');
+    
+    siteModal.show();
+}
+
+// Enregistrer un site
+function saveSite() {
+    const data = {
+        code: $('#code').val(),
+        nom: $('#nom').val(),
+        type_site: $('#type_site').val(),
+        client_nom: $('#client_nom').val() || null,
+        localisation: $('#localisation').val() || null,
+        date_debut: $('#date_debut').val() || null,
+        date_fin: $('#date_fin').val() || null,
+        statut: $('#statut').val() || 'EN_COURS',
+        actif: true
+    };
+    
+    const method = currentSiteId ? 'PUT' : 'POST';
+    const url = currentSiteId ? `/api/sites/${currentSiteId}` : '/api/sites';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            siteModal.hide();
+            loadSites();
+            alert('Site enregistré avec succès !');
+        },
+        error: function(error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors de l\'enregistrement : ' + (error.responseJSON?.detail || 'Erreur inconnue'));
+        }
+    });
+}
+
+// Supprimer un site
+function deleteSite(id) {
+    if (!confirm('Êtes-vous sûr de vouloir désactiver ce site ?')) return;
+    
+    $.ajax({
+        url: `/api/sites/${id}`,
+        method: 'DELETE',
+        success: function(response) {
+            loadSites();
+            alert('Site désactivé avec succès !');
+        },
+        error: function(error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la suppression');
+        }
+    });
+}
+</script>
+{% endblock %}
+

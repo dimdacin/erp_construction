@@ -1,0 +1,87 @@
+═══════════════════════════════════════════════════════════════════════
+   🚀 COMMENT DÉMARRER L'APPLICATION WEB ERP CONSTRUCTION
+═══════════════════════════════════════════════════════════════════════
+
+📝 ÉTAPES POUR DÉMARRER :
+
+1. Ouvrir un terminal PowerShell dans le dossier du projet
+2. Activer l'environnement virtuel :
+   .\venv\Scripts\Activate.ps1
+
+3. Lancer l'application web :
+   python start_web.py
+
+4. Ouvrir votre navigateur et aller sur :
+   http://localhost:8000
+
+5. Se connecter avec :
+   - Nom d'utilisateur : admin
+   - Mot de passe : admin123
+
+═══════════════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANT : SI VOUS VOYEZ LA PAGE DE DOCUMENTATION API
+
+Cela signifie que l'ancien serveur (main.py) tourne à la place du nouveau.
+
+SOLUTION :
+1. Arrêter tous les serveurs Python :
+   Stop-Process -Name python -Force
+
+2. Attendre 2 secondes
+
+3. Relancer le bon serveur :
+   python start_web.py
+
+4. Recharger http://localhost:8000 dans votre navigateur
+
+═══════════════════════════════════════════════════════════════════════
+
+🌐 PAGES DISPONIBLES :
+
+- http://localhost:8000/          → Redirige vers login ou dashboard
+- http://localhost:8000/login     → Page de connexion
+- http://localhost:8000/dashboard → Tableau de bord
+- http://localhost:8000/sites     → Gestion des sites/chantiers
+- http://localhost:8000/equipements → Liste des équipements
+- http://localhost:8000/personnel → Liste du personnel
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ VÉRIFICATION QUE LE BON SERVEUR TOURNE :
+
+Dans le terminal, vous devriez voir :
+============================================================
+🚀 Démarrage de l'application ERP Construction
+============================================================
+
+📱 Accédez à l'application sur : http://localhost:8000
+
+Si vous voyez ce message, c'est BON !
+
+Si vous voyez "INFO: Application startup complete" sans le message ci-dessus,
+c'est le MAUVAIS serveur qui tourne.
+
+═══════════════════════════════════════════════════════════════════════
+
+🆘 EN CAS DE PROBLÈME :
+
+Problème : Page blanche ou erreur 404
+Solution : Vérifiez que vous allez sur http://localhost:8000 (pas :8080 ou autre port)
+
+Problème : "Cannot connect" ou "Site inaccessible"
+Solution : Le serveur n'est pas démarré. Relancez "python start_web.py"
+
+Problème : Erreur "Port already in use"
+Solution : Arrêtez tous les serveurs Python et relancez
+
+Problème : Page de documentation API (avec /docs)
+Solution : Mauvais serveur ! Suivez les instructions "⚠️ IMPORTANT" ci-dessus
+
+═══════════════════════════════════════════════════════════════════════
+
+💡 CONSEIL : Toujours lancer avec "python start_web.py"
+            PAS avec "uvicorn main:app"
+
+═══════════════════════════════════════════════════════════════════════
+

@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block title %}Équipements - ERP Construction{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1><i class="fas fa-truck"></i> Équipements</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <button class="btn btn-success me-2" onclick="showDepenseModal()">
+            <i class="fas fa-receipt"></i> Nouvelle Dépense
+        </button>
+        <button class="btn btn-primary" onclick="alert('Fonction d\'ajout à venir')">
+            <i class="fas fa-plus"></i> Nouvel Équipement
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par code...">
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="searchImmat" class="form-control" placeholder="Rechercher par immatriculation...">
+            </div>
+            <div class="col-md-3">
+                <select id="filterCategorie" class="form-select">
+                    <option value="">Toutes les catégories</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-secondary w-100" onclick="loadEquipements()">
+                    <i class="fas fa-sync"></i> Actualiser
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Code</th>
+                        <th>Immatriculation</th>
+                        <th>Catégorie</th>
+                        <th>Coût horaire (LEI)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="equipementsTable">
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <div class="spinner-border" role="status"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Saisie Dépense -->
+<div class="modal fade" id="depenseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-receipt"></i> Nouvelle Dépense Équipement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="depenseForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="depense_equipement" class="form-label">Équipement *</label>
+                            <select class="form-select" id="depense_equipement" required>
+                                <option value="">Sélectionner un équipement...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="date_depense" class="form-label">Date *</label>
+                            <input type="date" class="form-control" id="date_depense" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fournisseur_nom" class="form-label">Fournisseur</label>
+                            <input type="text" class="form-control" id="fournisseur_nom" placeholder="Nom du fournisseur">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="type_intervention" class="form-label">Type d'intervention *</label>
+                            <select class="form-select" id="type_intervention" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="Réparation">Réparation</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Pneumatiques">Pneumatiques</option>
+                                <option value="Assurance">Assurance</option>
+                                <option value="Contrôle technique">Contrôle technique</option>
+                                <option value="Pièces">Pièces</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description_intervention" class="form-label">Description</label>
+                        <textarea class="form-control" id="description_intervention" rows="3" placeholder="Détails de l'intervention..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="montant" class="form-label">Montant (LEI) *</label>
+                        <input type="number" class="form-control" id="montant" step="0.01" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveDepense()">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let equipementsData = [];
+let categories = new Set();
+const depenseModal = new bootstrap.Modal(document.getElementById('depenseModal'));
+
+$(document).ready(function() {
+    loadEquipements();
+    $('#searchInput, #searchImmat, #filterCategorie').on('input change', filterEquipements);
+    
+    // Mettre la date d'aujourd'hui par défaut
+    $('#date_depense').val(new Date().toISOString().split('T')[0]);
+});
+
+function loadEquipements() {
+    $.ajax({
+        url: '/api/equipements?actif=',
+        method: 'GET',
+        success: function(data) {
+            equipementsData = data;
+            
+            // Extraire les catégories uniques
+            categories = new Set();
+            data.forEach(eq => {
+                if (eq.categorie) categories.add(eq.categorie);
+            });
+            
+            // Remplir le filtre de catégorie
+            $('#filterCategorie').html('<option value="">Toutes les catégories</option>');
+            Array.from(categories).sort().forEach(cat => {
+                $('#filterCategorie').append(`<option value="${cat}">${cat}</option>`);
+            });
+            
+            // Remplir le select des équipements pour le formulaire de dépense
+            $('#depense_equipement').html('<option value="">Sélectionner un équipement...</option>');
+            data.forEach(eq => {
+                $('#depense_equipement').append(`<option value="${eq.id}">${eq.code} - ${eq.immatriculation || 'Sans immat.'}</option>`);
+            });
+            
+            displayEquipements(data);
+        },
+        error: function(error) {
+            console.error('Erreur:', error);
+            $('#equipementsTable').html('<tr><td colspan="5" class="text-center text-danger">Erreur lors du chargement</td></tr>');
+        }
+    });
+}
+
+function displayEquipements(equipements) {
+    const tbody = $('#equipementsTable');
+    tbody.empty();
+    
+    if (equipements.length === 0) {
+        tbody.html('<tr><td colspan="5" class="text-center">Aucun équipement trouvé</td></tr>');
+        return;
+    }
+    
+    equipements.forEach(eq => {
+        tbody.append(`
+            <tr>
+                <td><strong>${eq.code}</strong></td>
+                <td>${eq.immatriculation || '-'}</td>
+                <td><span class="badge bg-info">${eq.categorie || '-'}</span></td>
+                <td>${eq.cout_horaire_theorique ? parseFloat(eq.cout_horaire_theorique).toFixed(2) : '-'}</td>
+                <td>
+                    <button class="btn btn-sm btn-success" onclick="showDepenseModalForEquipement(${eq.id})" title="Ajouter une dépense">
+                        <i class="fas fa-receipt"></i>
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="alert('Fonction d\'édition à venir')" title="Modifier">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            </tr>
+        `);
+    });
+}
+
+function filterEquipements() {
+    const search = $('#searchInput').val().toLowerCase();
+    const searchImmat = $('#searchImmat').val().toLowerCase();
+    const categorieFilter = $('#filterCategorie').val();
+    
+    const filtered = equipementsData.filter(eq => {
+        const matchCode = eq.code.toLowerCase().includes(search);
+        const matchImmat = !searchImmat || (eq.immatriculation && eq.immatriculation.toLowerCase().includes(searchImmat));
+        const matchCategorie = !categorieFilter || eq.categorie === categorieFilter;
+        
+        return matchCode && matchImmat && matchCategorie;
+    });
+    
+    displayEquipements(filtered);
+}
+
+// Afficher le modal de dépense
+function showDepenseModal(equipementId = null) {
+    $('#depenseForm')[0].reset();
+    $('#date_depense').val(new Date().toISOString().split('T')[0]);
+    
+    if (equipementId) {
+        $('#depense_equipement').val(equipementId);
+    }
+    
+    depenseModal.show();
+}
+
+// Afficher le modal pour un équipement spécifique
+function showDepenseModalForEquipement(equipementId) {
+    showDepenseModal(equipementId);
+}
+
+// Enregistrer une dépense
+function saveDepense() {
+    const formData = new FormData();
+    formData.append('equipement_id', $('#depense_equipement').val());
+    formData.append('date_depense', $('#date_depense').val());
+    formData.append('type_depense', $('#type_intervention').val());
+    formData.append('montant_ht', $('#montant').val());
+    
+    const fournisseur = $('#fournisseur_nom').val();
+    if (fournisseur) {
+        formData.append('fournisseur_nom', fournisseur);
+    }
+    
+    const description = $('#description_intervention').val();
+    if (description) {
+        formData.append('description', description);
+    }
+    
+    // Validation
+    if (!$('#depense_equipement').val() || !$('#date_depense').val() || 
+        !$('#type_intervention').val() || !$('#montant').val()) {
+        alert('Veuillez remplir tous les champs obligatoires (*)');
+        return;
+    }
+    
+    $.ajax({
+        url: '/api/depenses',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            depenseModal.hide();
+            alert(`Dépense de ${response.montant} LEI enregistrée avec succès pour ${response.equipement} !`);
+            $('#depenseForm')[0].reset();
+        },
+        error: function(error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors de l\'enregistrement : ' + (error.responseJSON?.detail || 'Erreur inconnue'));
+        }
+    });
+}
+</script>
+{% endblock %}
+

@@ -67,7 +67,20 @@ class Site(Base):
     nom = Column(Text, nullable=False)
     type_site = Column(String(20), nullable=False) # USINE, CHANTIER, DEPOT, BUREAU
     centre_analytique = Column(Enum(CentreAnalytique), nullable=False)
+    
+    # Informations de projet/chantier
+    client_id = Column(BigInteger, ForeignKey("client.id"))
+    localisation = Column(Text)
+    date_debut = Column(Date)
+    date_fin = Column(Date)
+    chef_chantier_id = Column(BigInteger, ForeignKey("personne.id"))  # Référence au responsable
+    statut = Column(String(20))  # EN_COURS, TERMINE, PLANIFIE, SUSPENDU
+    
     actif = Column(Boolean, default=True)
+    
+    # Relations
+    client = relationship("Client")
+    chef_chantier = relationship("Personne", foreign_keys=[chef_chantier_id])
 
 # 1.3 Autres Référentiels
 class Produit(Base):
@@ -81,12 +94,27 @@ class Fournisseur(Base):
     __tablename__ = "fournisseur"
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     nom_entreprise = Column(Text, nullable=False)
+
+class Client(Base):
+    __tablename__ = "client"
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    nom = Column(Text, nullable=False)
+    type_client = Column(String(50))  # PUBLIC, PRIVE, INSTITUTIONNEL
+    contact = Column(Text)
+    actif = Column(Boolean, default=True)
     
 class EquipementCategorie(Base):
     __tablename__ = "equipement_categorie"
     id = Column(Integer, primary_key=True, autoincrement=True)
     code = Column(String(30), nullable=False, unique=True)
     libelle = Column(Text, nullable=False)
+
+class Activite(Base):
+    __tablename__ = "activite"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(30), nullable=False, unique=True)
+    libelle = Column(Text, nullable=False)
+    type_activite = Column(String(30))  # PRODUCTION, MAINTENANCE, TRANSPORT, etc.
 
 # ============================================================
 # 2. RESSOURCES (PERSONNES & ÉQUIPEMENTS)
@@ -98,6 +126,9 @@ class Personne(Base):
     matricule = Column(String(30), unique=True)
     nom_prenom = Column(Text, nullable=False)
     
+    # Organisation hiérarchique
+    secteur = Column(String(100))  # Secteur d'activité
+    
     # FKs de rattachement
     division_id = Column(Integer, ForeignKey("division.id"))
     service_id = Column(Integer, ForeignKey("service.id"))
@@ -105,6 +136,7 @@ class Personne(Base):
 
     # Données de Coût
     salaire_tarif = Column(Numeric(14, 2))
+    accord_supplementaire = Column(Numeric(14, 2))  # Accord sup
     taux_horaire_cout = Column(Numeric(14, 2)) # Coût chargé utilisé dans les calculs
     
     actif = Column(Boolean, default=True)

@@ -1,71 +1,25 @@
 # reset_db.py
-# Script pour réinitialiser complètement la base de données
-"""
-Ce script permet de :
-1. Supprimer toutes les tables existantes
-2. Recréer toutes les tables selon les modèles définis
-3. Optionnellement, insérer des données de test
+# Script pour supprimer TOUTES les tables et les recréer avec le bon schéma
 
-ATTENTION : Ce script supprime TOUTES les données de la base de données !
-Utilisez-le uniquement en développement ou après avoir fait une sauvegarde.
-"""
+from database import Base, engine
+from models import *  # Importe tous les modèles
 
-from database import engine, Base
-from models import *
-import sys
-
-def reset_database(drop_all=True, create_all=True):
-    """
-    Réinitialise la base de données.
+def reset_database():
+    """Supprime toutes les tables puis les recrée."""
+    print("⚠️  ATTENTION : Suppression de TOUTES les tables...")
     
-    Args:
-        drop_all: Si True, supprime toutes les tables existantes
-        create_all: Si True, crée toutes les tables selon les modèles
-    """
-    try:
-        if drop_all:
-            print("⚠️  Suppression de toutes les tables existantes...")
-            Base.metadata.drop_all(bind=engine)
-            print("✅ Toutes les tables ont été supprimées.")
-        
-        if create_all:
-            print("🔨 Création de toutes les tables...")
-            Base.metadata.create_all(bind=engine)
-            print("✅ Toutes les tables ont été créées avec succès.")
-            
-            # Afficher la liste des tables créées
-            from sqlalchemy import inspect
-            inspector = inspect(engine)
-            tables = inspector.get_table_names()
-            print(f"\n📋 Tables créées ({len(tables)}):")
-            for table in sorted(tables):
-                print(f"   - {table}")
-        
-        print("\n✅ Réinitialisation de la base de données terminée avec succès !")
-        return True
-        
-    except Exception as e:
-        print(f"\n❌ Erreur lors de la réinitialisation : {e}")
-        import traceback
-        traceback.print_exc()
-        return False
+    # Supprime toutes les tables
+    Base.metadata.drop_all(bind=engine)
+    print("✅ Toutes les tables ont été supprimées.")
+    
+    # Recrée toutes les tables
+    print("🔄 Recréation de toutes les tables avec le nouveau schéma...")
+    Base.metadata.create_all(bind=engine)
+    print("✅ SUCCESS: Toutes les tables ont été recréées avec le bon schéma!")
 
-if __name__ == '__main__':
-    print("=" * 60)
-    print("  RÉINITIALISATION DE LA BASE DE DONNÉES")
-    print("=" * 60)
-    print("\n⚠️  ATTENTION : Cette opération va supprimer toutes les données !")
-    
-    # Demander confirmation
-    confirmation = input("\nÊtes-vous sûr de vouloir continuer ? (oui/non): ").strip().lower()
-    
-    if confirmation in ['oui', 'o', 'yes', 'y']:
-        success = reset_database()
-        if success:
-            sys.exit(0)
-        else:
-            sys.exit(1)
+if __name__ == "__main__":
+    confirmation = input("⚠️  ATTENTION : Cette opération supprimera TOUTES vos données. Continuer ? (oui/non) : ")
+    if confirmation.lower() in ['oui', 'yes', 'o', 'y']:
+        reset_database()
     else:
         print("❌ Opération annulée.")
-        sys.exit(0)
-
